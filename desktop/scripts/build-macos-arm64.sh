@@ -137,19 +137,59 @@ build_canonical_dmg() {
   local app_bundle="$1"
   local dmg_output="$2"
   local staging_dir
+  local rw_dmg
 
   staging_dir="$(mktemp -d "${TMPDIR:-/tmp}/cc-haha-dmg.XXXXXX")"
+  rw_dmg="$(mktemp "${TMPDIR:-/tmp}/cc-haha-rw.XXXXXX").dmg"
+
   cp -R "${app_bundle}" "${staging_dir}/"
   ln -s /Applications "${staging_dir}/Applications"
 
+  # Create a read-write DMG first so we can customize the Finder layout
   hdiutil create \
     -volname "Claude Code Haha" \
     -srcfolder "${staging_dir}" \
     -ov \
-    -format UDZO \
-    "${dmg_output}" >/dev/null
+    -format UDRW \
+    "${rw_dmg}" >/dev/null
 
   rm -rf "${staging_dir}"
+
+  # Mount the read-write DMG and apply Finder layout via AppleScript
+  local dev_name mount_dir
+  dev_name=$(hdiutil attach -readwrite -noverify -noautoopen -nobrowse "${rw_dmg}" \
+    | grep -E '^/dev/' | head -1 | awk '{print $1}')
+  mount_dir=$(hdiutil info | grep -E "${dev_name}" | tail -1 | awk '{$1=$2=""; print}' | xargs)
+
+  # Use AppleScript to set icon positions and window size
+  osascript <<APPLESCRIPT
+tell application "Finder"
+  tell disk "Claude Code Haha"
+    open
+    set current view of container window to icon view
+    set toolbar visible of container window to false
+    set statusbar visible of container window to false
+    set the bounds of container window to {100, 100, 760, 500}
+    set viewOptions to the icon view options of container window
+    set arrangement of viewOptions to not arranged
+    set icon size of viewOptions to 128
+    set position of item "${APP_BUNDLE_NAME}" of container window to {180, 170}
+    set position of item "Applications" of container window to {480, 170}
+    close
+    open
+    update without registering applications
+    delay 2
+    close
+  end tell
+end tell
+APPLESCRIPT
+
+  sync
+  hdiutil detach "${dev_name}" -quiet
+
+  # Convert to compressed read-only DMG
+  hdiutil convert "${rw_dmg}" -format UDZO -o "${dmg_output}" -ov >/dev/null
+  rm -f "${rw_dmg}"
 }
 
 if [[ -n "${LATEST_DMG}" ]]; then

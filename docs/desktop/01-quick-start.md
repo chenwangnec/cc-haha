@@ -6,11 +6,11 @@
 <a href="#一界面布局">界面布局</a> · <a href="#二对话操作">对话操作</a> · <a href="#三多标签系统">多标签系统</a> · <a href="#四权限控制">权限控制</a> · <a href="#五项目管理">项目管理</a> · <a href="#六模型与提供商">模型与提供商</a> · <a href="#七im-适配器接入">IM 适配器</a> · <a href="#八定时任务">定时任务</a>
 </p>
 
-![桌面端界面总览](./images/01-desktop-overview.png)
-
 ---
 
 ## 一、界面布局
+
+![桌面端界面总览](../images/desktop_ui/01_full_ui.png)
 
 桌面端采用**三栏 + 标签页**的经典 IDE 布局，从左到右分为：
 
@@ -72,6 +72,8 @@
 
 ### 斜杠命令
 
+![斜杠命令菜单](../images/desktop_ui/09_slash_command.png)
+
 输入 `/` 触发命令自动补全菜单：
 
 ```
@@ -88,6 +90,8 @@
 - 命令列表由服务端动态提供，支持搜索过滤
 
 ### @ 文件引用
+
+![文件搜索菜单](../images/desktop_ui/09_file_search.png)
 
 输入 `@` 触发文件搜索菜单，快速将文件引入对话上下文：
 
@@ -167,6 +171,8 @@ AI 回复时实时流式展示，支持：
 ---
 
 ## 四、权限控制
+
+![权限请求与 AI 提问](../images/desktop_ui/03_ask_question_and_permission.png)
 
 Claude Code 在执行文件修改、Shell 命令等操作前，会请求你的权限。
 
